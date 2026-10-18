@@ -1,0 +1,38 @@
+package proxy_check
+
+include "model.salam"
+
+/// Evaluate EIP-1967 proxy upgradeability exposure and source verification status.
+pub func InspectProxy(rec: model.ContractRecord): model.FindingCheck:
+    if rec.has_proxy_slot == "yes" or rec.has_proxy_slot == "true":
+        ret model.FindingCheck {
+            safe = false
+            rule_id = "EIP1967-PROXY"
+            detail = "active EIP-1967 upgradeable proxy slot detected; monitor implementation changes"
+            risk_points = 20
+        }
+    end
+    ret model.FindingCheck {
+        safe = true
+        rule_id = "IMMUTABLE-CODE"
+        detail = "no EIP-1967 upgradeable proxy slot flagged"
+        risk_points = 0
+    }
+end
+
+pub func InspectVerification(rec: model.ContractRecord): model.FindingCheck:
+    if rec.verified_source == "yes" or rec.verified_source == "true":
+        ret model.FindingCheck {
+            safe = true
+            rule_id = "SOURCE-VERIFIED"
+            detail = "contract source code is publicly verified"
+            risk_points = 0
+        }
+    end
+    ret model.FindingCheck {
+        safe = false
+        rule_id = "UNVERIFIED-BYTECODE"
+        detail = "unverified bytecode deployment increases opaque execution risk"
+        risk_points = 30
+    }
+end
