@@ -1,0 +1,34 @@
+package model
+
+/// Parsed EVM contract record from a pipe-delimited manifest line:
+/// CONTRACT_NAME|CHAIN|ADDRESS|HEX_BYTECODE|HAS_PROXY_SLOT|VERIFIED_SOURCE
+pub struct ContractRecord:
+    pub name: str = ""
+    pub chain: str = ""
+    pub address: str = ""
+    pub bytecode: str = ""
+    pub has_proxy_slot: str = ""
+    pub verified_source: str = ""
+end
+
+pub struct ParseResult:
+    pub ok: bool = false
+    pub record: ContractRecord = ContractRecord {}
+    pub error: str = ""
+end
+
+pub struct FindingCheck:
+    pub safe: bool = false
+    pub rule_id: str = ""
+    pub detail: str = ""
+    pub risk_points: int = 0
+end
+
+pub struct AuditSummary:
+    pub opcode_check: FindingCheck = FindingCheck {}
+    pub proxy_check: FindingCheck = FindingCheck {}
+    pub verification_check: FindingCheck = FindingCheck {}
+    pub size_check: FindingCheck = FindingCheck {}
+    pub total_risk: int = 0
+    pub posture: str = ""
+end
