@@ -1,0 +1,28 @@
+import os
+
+include "src/parser.salam"
+include "src/eip7702_detector.salam"
+include "src/score.salam"
+include "src/report.salam"
+include "src/sarif_exporter.salam"
+
+func main:
+    args := os.Args()
+    if args.len() != 2:
+        println "usage: salam-evm-auditor <manifest-record-file>"
+        os.Exit(64)
+    end
+    raw := os.ReadFile(args.get(1))
+    parsed := parser.ParseRecord(raw)
+    if not parsed.ok:
+        println "INVALID_MANIFEST: " + parsed.error
+        os.Exit(64)
+    end
+    summary := score.ComputeAudit(parsed.record)
+    println report.RenderReport(parsed.record, summary)
+    println sarif_exporter.RenderSarifGate(parsed.record, summary)
+    if summary.posture == "CRITICAL_REVIEW":
+        os.Exit(2)
+    end
+    os.Exit(0)
+end
