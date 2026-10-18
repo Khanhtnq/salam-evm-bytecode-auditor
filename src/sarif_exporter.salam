@@ -1,0 +1,7 @@
+package sarif_exporter
+
+include "model.salam"
+
+pub func RenderSarifGate(rec: model.ContractRecord, summary: model.AuditSummary): str:
+    ret "SARIF_2_1_0|contract=" + rec.name + "|chain=" + rec.chain + "|score=" + summary.total_risk + "|posture=" + summary.posture
+end
