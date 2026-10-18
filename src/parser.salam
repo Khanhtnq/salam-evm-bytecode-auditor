@@ -1,0 +1,34 @@
+package parser
+
+include "model.salam"
+include "hexclean.salam"
+
+/// Parse CONTRACT_NAME|CHAIN|ADDRESS|HEX_BYTECODE|HAS_PROXY_SLOT|VERIFIED_SOURCE
+pub func ParseRecord(line: str): model.ParseResult:
+    mut parts := line.trim().split("|")
+    defer parts.free()
+    if parts.len() != 6:
+        ret model.ParseResult {
+            ok = false
+            error = "expected 6 pipe-delimited fields: NAME|CHAIN|ADDRESS|BYTECODE|HAS_PROXY_SLOT|VERIFIED_SOURCE"
+        }
+    end
+    clean_hex := hexclean.NormalizeHex(parts.get(3))
+    if clean_hex.len() == 0 or clean_hex.len() % 2 != 0:
+        ret model.ParseResult {
+            ok = false
+            error = "bytecode hex must be non-empty and contain an even number of hex characters"
+        }
+    end
+    ret model.ParseResult {
+        ok = true
+        record = model.ContractRecord {
+            name = hexclean.CleanField(parts.get(0))
+            chain = hexclean.CleanField(parts.get(1))
+            address = hexclean.CleanField(parts.get(2))
+            bytecode = clean_hex
+            has_proxy_slot = hexclean.CleanField(parts.get(4)).lower()
+            verified_source = hexclean.CleanField(parts.get(5)).lower()
+        }
+    }
+end

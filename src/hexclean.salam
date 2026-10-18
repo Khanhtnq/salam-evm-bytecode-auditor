@@ -1,0 +1,16 @@
+package hexclean
+
+import str
+
+/// Normalize whitespace and strip leading 0x prefix from EVM hex strings.
+pub func NormalizeHex(raw: str): str:
+    trimmed := raw.trim().lower()
+    if str.StartsWith(trimmed, "0x"):
+        ret trimmed.slice(2, trimmed.len())
+    end
+    ret trimmed
+end
+
+pub func CleanField(raw: str): str:
+    ret raw.trim()
+end
