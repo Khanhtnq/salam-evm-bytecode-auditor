@@ -1,0 +1,8 @@
+services:
+  salam-evm-auditor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
