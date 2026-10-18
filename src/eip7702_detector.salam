@@ -1,0 +1,21 @@
+package eip7702_detector
+
+import str
+include "model.salam"
+
+pub func InspectEip7702(rec: model.ContractRecord): model.FindingCheck:
+    if str.StartsWith(rec.bytecode, "ef0100") and rec.bytecode.len() == 46:
+        ret model.FindingCheck {
+            safe = false
+            rule_id = "EIP7702-DELEGATION"
+            detail = "EIP-7702 delegated EOA designator (0xef0100 prefix, 23 bytes)"
+            risk_points = 20
+        }
+    end
+    ret model.FindingCheck {
+        safe = true
+        rule_id = "EIP7702-NONE"
+        detail = "standard contract runtime bytecode"
+        risk_points = 0
+    }
+end
