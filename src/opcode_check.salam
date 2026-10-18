@@ -1,0 +1,33 @@
+package opcode_check
+
+import str
+
+include "model.salam"
+
+/// Inspect normalized hex bytecode for high-risk EVM opcode signatures (SELFDESTRUCT 0xff, DELEGATECALL 0xf4).
+pub func InspectBytecode(rec: model.ContractRecord): model.FindingCheck:
+    has_ff := str.Contains(rec.bytecode, "ff")
+    has_f4 := str.Contains(rec.bytecode, "f4")
+    if has_ff and has_f4:
+        ret model.FindingCheck {
+            safe = false
+            rule_id = "EVM-OP-01"
+            detail = "contains both DELEGATECALL (0xf4) and SELFDESTRUCT (0xff) byte patterns"
+            risk_points = 45
+        }
+    end
+    if has_f4:
+        ret model.FindingCheck {
+            safe = false
+            rule_id = "EVM-OP-02"
+            detail = "contains DELEGATECALL (0xf4) execution path"
+            risk_points = 25
+        }
+    end
+    ret model.FindingCheck {
+        safe = true
+        rule_id = "EVM-OP-00"
+        detail = "no high-risk SELFDESTRUCT or DELEGATECALL patterns flagged"
+        risk_points = 0
+    }
+end
