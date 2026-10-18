@@ -1,0 +1,48 @@
+package score
+
+include "model.salam"
+include "opcode_check.salam"
+include "proxy_check.salam"
+
+pub func InspectSize(rec: model.ContractRecord): model.FindingCheck:
+    byte_len := rec.bytecode.len() / 2
+    if byte_len < 32:
+        ret model.FindingCheck {
+            safe = false
+            rule_id = "MINIMAL-PROXY-STUB"
+            detail = "tiny bytecode footprint (" + byte_len + " bytes) resembles minimal proxy stub"
+            risk_points = 10
+        }
+    end
+    ret model.FindingCheck {
+        safe = true
+        rule_id = "STANDARD-SIZE"
+        detail = "bytecode size " + byte_len + " bytes within normal contract range"
+        risk_points = 0
+    }
+end
+
+pub func ComputeAudit(rec: model.ContractRecord): model.AuditSummary:
+    op := opcode_check.InspectBytecode(rec)
+    pr := proxy_check.InspectProxy(rec)
+    vr := proxy_check.InspectVerification(rec)
+    sz := InspectSize(rec)
+    mut total := op.risk_points + pr.risk_points + vr.risk_points + sz.risk_points
+    if total > 100:
+        total = 100
+    end
+    mut posture := "LOW_RISK"
+    if total >= 60:
+        posture = "CRITICAL_REVIEW"
+    else total >= 25:
+        posture = "ELEVATED_MONITORING"
+    end
+    ret model.AuditSummary {
+        opcode_check = op
+        proxy_check = pr
+        verification_check = vr
+        size_check = sz
+        total_risk = total
+        posture = posture
+    }
+end

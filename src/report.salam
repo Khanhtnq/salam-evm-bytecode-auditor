@@ -1,0 +1,23 @@
+package report
+
+include "model.salam"
+
+func FormatLine(chk: model.FindingCheck): str:
+    tag := chk.safe ? "PASS" : "FLAG"
+    ret "[" + tag + "] " + chk.rule_id + " (+" + chk.risk_points + "): " + chk.detail
+end
+
+pub func RenderReport(rec: model.ContractRecord, summary: model.AuditSummary): str:
+    mut out := "Contract: " + rec.name + " (" + rec.chain + " " + rec.address + ")
+"
+    out = out + "Security Posture: " + summary.posture + " | Risk Score: " + summary.total_risk + "/100
+"
+    out = out + FormatLine(summary.opcode_check) + "
+"
+    out = out + FormatLine(summary.proxy_check) + "
+"
+    out = out + FormatLine(summary.verification_check) + "
+"
+    out = out + FormatLine(summary.size_check)
+    ret out
+end
